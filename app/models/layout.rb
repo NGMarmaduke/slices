@@ -1,7 +1,7 @@
 class Layout
   def self.all
     files.map do |layout|
-      layout = layout.split('/').last.gsub(file_extension, '')
+      layout = layout.split('/').last.gsub(Regexp.new(file_extension), '')
       [layout.titleize, layout]
     end
   end
@@ -12,13 +12,11 @@ class Layout
       query = File.join(resolver, 'layouts', "*#{file_extension}")
       files.concat(Dir.glob(query))
     end
-    files.reject do |file|
-      file.include?('admin.html.erb')
-    end.uniq.sort
+    files.delete_if{|f| f.include?('admin.html.')}.uniq.sort
   end
 
   def self.file_extension
-    '.html.erb'
+    '.html.*'
   end
 
   def initialize(name)
@@ -27,7 +25,7 @@ class Layout
 
   def path
     self.class.files.select do |path|
-      path.split('/').last == @name + self.class.file_extension
+      Regexp.new("#{@name}#{self.class.file_extension}") =~ path.split('/').last
     end.first
   end
 
