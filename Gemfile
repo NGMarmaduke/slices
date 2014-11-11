@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gemspec
 gem 'fog'
+gem 'jcrop-rails-v2'
 
 group :development, :test do
   gem 'bundler'

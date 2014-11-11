@@ -1,0 +1,82 @@
+slices.AssetResizeView = slices.AssetThumbView.extend({
+
+  tagName: 'li',
+  className: 'resizable asset-library-item',
+
+  template: Handlebars.compile(
+    '<img src="{{src}}" alt="{{name}}">'+
+    '<input type="hidden" class="x">'+
+    '<input type="hidden" class="y">'+
+    '<input type="hidden" class="width">'+
+    '<input type="hidden" class="height">'
+  ),
+
+  initialize: function() {
+    _.bindAll(this);
+    this.$el.append('<div class="asset-details">');
+    $('.post-size input').change(this.attatchCropTool)
+    this.model.bind('change', this.attatchNewCropTool);
+    this.model.bind('destroying', this.whenModelIsDestroying);
+  },
+
+  render: function() {
+    console.log('m', this.model);
+    this.$el.find('.asset-details').html(this.template(this));
+    return this;
+  },
+  attatchCropTool: function() {
+    img = this.$el.find('img');
+    switch ($('.post-size input:checked').val()) {
+      case "tall":
+        ratio = 1/2;
+        break;
+      case "wide":
+        ratio = 2/1;
+        break;
+      case "normal":
+      case "large":
+        ratio = 1;
+        break;
+      default:
+        ratio = 1;
+        break;
+    }
+    if (typeof img.data('Jcrop') !== "undefined" && img.data('Jcrop') !== null) {
+      img.data('Jcrop').setOptions({
+        aspectRatio: ratio
+      });
+    } else {
+      img.Jcrop({
+        setSelect: [ $(img).width(), 0, 0, 0 ],
+        aspectRatio: ratio,
+        onSelect: this.update_hidden,
+        onChange: this.update_hidden
+      });
+    }
+  },
+  update_hidden: function(c){
+    $('#slices-form').trigger('change')
+    this.$('.width').val(c.w)
+    this.$('.height').val(c.h)
+    this.$('.x').val(c.x)
+    this.$('.y').val(c.y)
+    this.model.set('width', c.w)
+    this.model.set('height', c.h)
+    this.model.set('x', c.x)
+    this.model.set('y', c.y)
+  },
+  src: function() {
+    return this.model.get('original_url')
+        || '<%= asset_path 'slices/icon_generic_file.png' %>';
+  },
+  name: function() {
+    return this.model.get('name');
+  },
+  url: function() {
+    return this.model.url();
+  },
+  attatchNewCropTool: function() {
+    this.whenModelChanges()
+    this.attatchCropTool()
+  }
+})

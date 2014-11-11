@@ -10,6 +10,7 @@ slices.AttachmentView = Backbone.View.extend({
 
   template: Handlebars.compile(
     '<div class="attachment-thumb"></div>' +
+    '<div class="attachment-resizing"></div>' +
     '<div class="attachment-fields"></div>' +
     '<span data-action="remove" class="remove">Remove</span>'
   ),
@@ -25,9 +26,24 @@ slices.AttachmentView = Backbone.View.extend({
   // Render our template to this.el.
   render: function() {
     $(this.el).html(this.template(this));
-    this.renderAssetThumb();
-    this.renderFields();
+    if(this.options.resizable) {
+      this.renderResizeView();
+    } else {
+      this.renderAssetThumb();
+      this.renderFields();
+    }
     return this;
+  },
+
+  renderResizeView: function() {
+    if (!this.model.get('asset')) return;
+
+    this.assetThumb = new slices.AssetResizeView({
+      model: this.model.get('asset')
+    });
+    this.$el.addClass('resizable-attatchment')
+    this.$('.attachment-resizing').prepend(this.assetThumb.render().el);
+    this.assetThumb.attatchCropTool();
   },
 
   // If this attachment has an asset, we can render an AssetThumbView.

@@ -81,7 +81,8 @@ slices.AttachmentComposerView = Backbone.View.extend({
   addAttachment: function(attachment, collection, options) {
     var view = new slices.AttachmentView({
       fields: this.options.fields,
-      model: attachment
+      model: attachment,
+      resizable: this.options.resizable
     });
 
     if (options.index < collection.length - 1) {

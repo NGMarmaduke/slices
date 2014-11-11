@@ -10,6 +10,7 @@
  *= require slices/vendor/jquery-ui
  *= require slices/vendor/livefield
  *= require slices/vendor/moment
+ *= require slices/vendor/jquery.Jcrop
 
  *= require_tree ./lib
  *= require slices/vendor/jquery-ui_nested-sortable

@@ -31,6 +31,7 @@ Handlebars.registerHelper('attachmentComposer', function(options) {
     collection : this[options.hash.field],
     fields     : options.fn,
     autoAttach : true,
+    resizable  : options.hash.resizable,
     allowDupes : options.hash.allowDupes
   });
 
