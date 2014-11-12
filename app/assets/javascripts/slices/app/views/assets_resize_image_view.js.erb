@@ -20,18 +20,28 @@ slices.AssetResizeView = slices.AssetThumbView.extend({
   },
 
   render: function() {
-    console.log('m', this.model);
     this.$el.find('.asset-details').html(this.template(this));
     return this;
   },
   attatchCropTool: function() {
     img = this.$el.find('img');
+    if(this.model.get('crop_x') == null || this.model.get('crop_x') != 0) {
+      bounding_box = [ $(img).width(), 0, 0, 0 ]
+    } else {
+      crop_ratio = this.getActualCropRatio();
+      bounding_box = [
+        (this.model.get('crop_x')/crop_ratio),
+        (this.model.get('crop_y')/crop_ratio),
+        (this.model.get('crop_x')/crop_ratio) + (this.model.get('crop_width')/crop_ratio),
+        (this.model.get('crop_y')/crop_ratio) + (this.model.get('crop_height')/crop_ratio)
+      ]
+    }
     switch ($('.post-size input:checked').val()) {
       case "tall":
-        ratio = 1/2;
+        ratio = 2/3;
         break;
       case "wide":
-        ratio = 2/1;
+        ratio = 3/2;
         break;
       case "normal":
       case "large":
@@ -47,23 +57,38 @@ slices.AssetResizeView = slices.AssetThumbView.extend({
       });
     } else {
       img.Jcrop({
-        setSelect: [ $(img).width(), 0, 0, 0 ],
+        setSelect: bounding_box,
         aspectRatio: ratio,
-        onSelect: this.update_hidden,
-        onChange: this.update_hidden
+        onSelect: this.update_model_resize,
+        onChange: this.update_model_resize
       });
     }
   },
-  update_hidden: function(c){
-    $('#slices-form').trigger('change')
-    this.$('.width').val(c.w)
-    this.$('.height').val(c.h)
-    this.$('.x').val(c.x)
-    this.$('.y').val(c.y)
-    this.model.set('width', c.w)
-    this.model.set('height', c.h)
-    this.model.set('x', c.x)
-    this.model.set('y', c.y)
+  update_model_resize: function(c){
+    crop_ratio = this.getActualCropRatio();
+    x = c.x * crop_ratio;
+    y = c.y * crop_ratio;
+    width = c.w * crop_ratio
+    height = c.h * crop_ratio
+    attatchment = $('li.resizable-attatchment').data('model')
+    this.model.attributes['crop_x'] = x;
+    this.model.attributes['crop_y'] = y;
+    this.model.attributes['crop_width'] = width;
+    this.model.attributes['crop_height'] = height;
+    attatchment.set('crop_x', x);
+    attatchment.set('crop_y', y);
+    attatchment.set('crop_width', width);
+    attatchment.set('crop_height', height);
+    slices.model.Page.changed = true;
+    $('#slices-form').trigger('change');
+  },
+  getActualCropRatio: function(){
+    screenImage = this.$el.find('img');
+    if(typeof this.model.get('file_dimensions') !== "undefined") {
+      return this.model.get('file_dimensions').original.split('x')[0] / screenImage.width()
+    } else {
+      return screenImage[0].naturalWidth / screenImage.width()
+    }
   },
   src: function() {
     return this.model.get('original_url')
@@ -76,7 +101,7 @@ slices.AssetResizeView = slices.AssetThumbView.extend({
     return this.model.url();
   },
   attatchNewCropTool: function() {
-    this.whenModelChanges()
-    this.attatchCropTool()
+    this.whenModelChanges();
+    this.attatchCropTool();
   }
 })

@@ -21,7 +21,10 @@ slices.Attachment = Backbone.Model.extend({
 
   toJSON: function() {
     var attrs = _.clone(this.attributes);
-    delete attrs.asset;
+    attrs['crop_x']      = this.get('asset').get('crop_x')
+    attrs['crop_y']      = this.get('asset').get('crop_y')
+    attrs['crop_width']  = this.get('asset').get('crop_width')
+    attrs['crop_height'] = this.get('asset').get('crop_height')
     return attrs;
   }
 

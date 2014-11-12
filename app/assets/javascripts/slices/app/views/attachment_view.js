@@ -37,7 +37,6 @@ slices.AttachmentView = Backbone.View.extend({
 
   renderResizeView: function() {
     if (!this.model.get('asset')) return;
-
     this.assetThumb = new slices.AssetResizeView({
       model: this.model.get('asset')
     });

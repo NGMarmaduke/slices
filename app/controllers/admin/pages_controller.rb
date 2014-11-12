@@ -56,6 +56,20 @@ class Admin::PagesController < Admin::AdminController
 
     @page.update_attributes(params[:page])
 
+    images = params[:page][:slices][0][:image]
+    if images.present?
+      images.each do |image_to_crop|
+        next if image_to_crop[:crop_x].nil?
+        image = Asset.find(image_to_crop[:asset_id])
+        image.update_attributes(
+          crop_x: image_to_crop[:crop_x],
+          crop_y: image_to_crop[:crop_y],
+          crop_width: image_to_crop[:crop_width],
+          crop_height: image_to_crop[:crop_height],
+        )
+      end
+    end
+
     if @page.valid?
       render json: as_json_for_page(@page)
     else

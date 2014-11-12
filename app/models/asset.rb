@@ -15,6 +15,11 @@ class Asset
   field :file_fingerprint, type: String
   field :file_dimensions, type: Hash, default: {}
 
+  field :crop_x, type: Integer
+  field :crop_y, type: Integer
+  field :crop_width, type: Integer
+  field :crop_height, type: Integer
+
   field :destroyed_at, type: Time
   field :tags, type: String
   field :page_cache, type: Array, default: []
@@ -26,12 +31,14 @@ class Asset
     max_size:        50.megabytes,
     url:             '/system/:attachment/:mon_year/:id/:style/:filename',
     path:            ':rails_root/public:url',
-    only_process:    [:admin],
+    only_process:    [:admin, :cropped],
     styles:          Slices::Config.asset_styles,
-    convert_options: Slices::Config.asset_convert_options
+    convert_options: Slices::Config.asset_convert_options,
+    processors:      [:cropped]
 
   before_file_post_process :is_image?
   after_file_post_process :store_dimensions, if: :is_image?
+  after_update :reprocess_home_image, if: :cropping? and :is_image?
   before_save :reset_file_dimensions!, if: :file_fingerprint_changed?
   before_save :rename_file
   after_destroy :remove_asset_from_pages
@@ -70,7 +77,12 @@ class Asset
       errors:            errors,
       created_at:        created_at,
       tags:              tags,
-      pages:             page_cache
+      pages:             page_cache,
+      crop_x:            crop_x,
+      crop_y:            crop_y,
+      crop_width:        crop_width,
+      crop_height:       crop_height,
+      file_dimensions:   file_dimensions
     }
   end
 
@@ -181,6 +193,14 @@ class Asset
       next if key == 'original' || key == 'admin'
       self.file_dimensions.delete key
     end
+  end
+
+  def cropping?
+    !crop_x.blank? && !crop_y.blank? && !crop_width.blank? && !crop_height.blank?
+  end
+
+  def reprocess_home_image
+    file.reprocess!
   end
 
   private
