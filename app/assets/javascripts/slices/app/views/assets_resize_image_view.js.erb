@@ -25,7 +25,7 @@ slices.AssetResizeView = slices.AssetThumbView.extend({
   },
   attatchCropTool: function() {
     img = this.$el.find('img');
-    if(this.model.get('crop_x') == null || this.model.get('crop_x') == 0) {
+    if(this.model.get('crop_width') == null || this.model.get('crop_width') == 0) {
       bounding_box = [ $(img).width(), 0, 0, 0 ]
     } else {
       crop_ratio = this.getActualCropRatio();
