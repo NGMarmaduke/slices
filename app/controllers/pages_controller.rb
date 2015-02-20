@@ -35,7 +35,7 @@ class PagesController < SlicesController
 
   private
     def add_www_subdomain
-      unless /^www/.match(request.host)
+      unless /^www/.match(request.host) or Rails.env.development?
         redirect_to("#{request.protocol}www.fitzdares.com#{request.fullpath}",
                     :status => 301)
       end
