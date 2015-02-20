@@ -1,4 +1,5 @@
 class PagesController < SlicesController
+  before_filter :add_www_subdomain
 
   caches_page :virtual_error_pages
 
@@ -33,6 +34,12 @@ class PagesController < SlicesController
   end
 
   private
+    def add_www_subdomain
+      unless /^www/.match(request.host)
+        redirect_to("#{request.protocol}www.fitzdares.com#{request.fullpath}",
+                    :status => 301)
+      end
+    end
     def post_slice(page)
       page.slices.detect { |s| s.respond_to?(:handle_post) }.tap do |slice|
         slice.nil? && (raise RuntimeError.new("page can't handle POST data"))
