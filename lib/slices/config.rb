@@ -54,6 +54,7 @@ module Slices
         bucket: default_options[:fog_directory],
         access_key_id: default_options[:fog_credentials][:aws_access_key_id],
         secret_access_key: default_options[:fog_credentials][:aws_secret_access_key],
+        region: default_options[:fog_credentials][:region],
       }
     end
 
