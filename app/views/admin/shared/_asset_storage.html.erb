@@ -8,7 +8,7 @@
       success_action_status : '201',
     };
 
-    <%- region = if Slices::Config.s3_credentials[:region] ? "s3-#{Slices::Config.s3_credentials[:region]}" : 's3' %>
+    <% region = Slices::Config.s3_credentials[:region] ? "s3-#{Slices::Config.s3_credentials[:region]}" : 's3' %>
 
     slices.S3_URL = 'https://<%= Slices::Config.s3_credentials[:bucket] %>.<%= region %>.amazonaws.com/';
     slices.S3_TEMPFILE_KEY_PREFIX = '<%= Slices::Config::S3_TEMPFILE_KEY_PREFIX %>';
